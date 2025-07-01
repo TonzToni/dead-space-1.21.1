@@ -6,7 +6,7 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 import net.tonz.deadspace.DeadSpace;
-import net.tonz.deadspace.DisplayBlockEntity;
+import net.tonz.deadspace.displayblock.DisplayBlockEntity;
 
 public class ModBlockEntities {
     public static BlockEntityType<DisplayBlockEntity> DISPLAY_BLOCK_ENTITY;

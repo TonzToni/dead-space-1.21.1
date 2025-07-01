@@ -1,4 +1,4 @@
-package net.tonz.deadspace;
+package net.tonz.deadspace.displayblock;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;

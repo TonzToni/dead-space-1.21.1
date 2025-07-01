@@ -8,7 +8,7 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 import net.tonz.deadspace.DeadSpace;
-import net.tonz.deadspace.DisplayBlock;
+import net.tonz.deadspace.displayblock.DisplayBlock;
 
 public class ModBlocks {
     public static final Block DISPLAY_BLOCK = new DisplayBlock(FabricBlockSettings.create().strength(4.0f));
