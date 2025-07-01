@@ -47,6 +47,8 @@ public class DisplayBlockEntity extends BlockEntity {
         counter = nbt.getInt("Counter");
     }
 
+
+
     public static void tick(World world, BlockPos pos, BlockState state, DisplayBlockEntity blockEntity) {
         blockEntity.increment(); // or whatever you want it to do each tick
     }
