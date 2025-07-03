@@ -31,8 +31,8 @@ public class DisplayBlockEntityRenderer implements BlockEntityRenderer<DisplayBl
         matrices.push();
 
         // Position quad at top face
-        matrices.translate(0.5, 1.01, 0.5);
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-90));
+        matrices.translate(0.5, 0.5, 1.001);
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(0));
 
         Matrix4f matrix = matrices.peek().getPositionMatrix();
 

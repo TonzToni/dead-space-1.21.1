@@ -13,28 +13,32 @@ import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 
 @Environment(EnvType.CLIENT)
 public class DeadSpaceClient implements ClientModInitializer {
-    private boolean framebufferInitialized = false;
 
+    /*
+    private boolean framebufferInitialized = false;
     @Override
     public void onInitializeClient() {
         // Register the block entity renderer (optional here, but good to keep)
         BlockEntityRendererRegistry.register(ModBlockEntities.DISPLAY_BLOCK_ENTITY, DisplayBlockEntityRenderer::new);
 
         // Delay framebuffer initialization until client window is ready
-        WorldRenderEvents.END.register(context -> {
+        WorldRenderEvents.START.register(context -> {
             if (!framebufferInitialized) {
                 CameraFramebufferManager.init(256, 256);
-                CameraFramebufferManager.renderRed();
+                //CameraFramebufferManager.renderRed();
+                CameraFramebufferManager.renderPlayerCameraView();
                 framebufferInitialized = true;
                 System.out.println("Framebuffer initialized during render phase.");
             }
         });
-        /* // WHEN USED DOESNT RENDER ARM
-        WorldRenderEvents.END.register(context -> {
-            CameraFramebufferManager.init(256, 256);
-            CameraFramebufferManager.renderRed(); // re-clear every frame
-        });
-         */
+    }
+
+     */
+
+    @Override
+    public void onInitializeClient() {
+        BlockEntityRendererRegistry.register(ModBlockEntities.DISPLAY_BLOCK_ENTITY, DisplayBlockEntityRenderer::new);
+        CameraFramebufferManager.registerRenderHook();
     }
 
 }
