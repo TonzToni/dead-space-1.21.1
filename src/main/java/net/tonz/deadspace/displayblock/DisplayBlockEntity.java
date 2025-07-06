@@ -26,7 +26,7 @@ public class DisplayBlockEntity extends BlockEntity {
         if (tickCount >= 20)
         {
             counter++;
-            System.out.println("Counter: " + counter);
+            //System.out.println("Counter: " + counter);
             if (counter >= 10) {
                 counter = 0;
             }
@@ -50,6 +50,6 @@ public class DisplayBlockEntity extends BlockEntity {
 
 
     public static void tick(World world, BlockPos pos, BlockState state, DisplayBlockEntity blockEntity) {
-        blockEntity.increment(); // or whatever you want it to do each tick
+        blockEntity.increment();
     }
 }

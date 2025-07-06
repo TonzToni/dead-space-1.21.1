@@ -1,40 +1,64 @@
 package net.tonz.deadspace.camera;
 
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
+import net.minecraft.client.render.GameRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.BlockView;
+import org.joml.Matrix4f;
 
 public class ModCamera extends Camera {
-    private Vec3d fixedPos;
-    private float fixedPitch;
-    private float fixedYaw;
+    private Vec3d customPos;
+    private float customPitch;
+    private float customYaw;
 
-    public ModCamera(Vec3d pos, float pitch, float yaw) {
-        super();
-        this.fixedPos = pos;
-        this.fixedPitch = pitch;
-        this.fixedYaw = yaw;
-    }
-
-    @Override
-    public Vec3d getPos() {
-        return fixedPos;
-    }
-
-    @Override
-    public float getPitch() {
-        return fixedPitch;
-    }
-
-    @Override
-    public float getYaw() {
-        return fixedYaw;
+    public ModCamera() {
+        this.customPos = new Vec3d(0, 0, 0);
+        this.customPitch = 0;
+        this.customYaw = 0;
+        this.setRotation(customYaw, customPitch);
     }
 
     @Override
     public void update(BlockView area, Entity focusedEntity, boolean thirdPerson, boolean inverseView, float tickDelta) {
-        this.setPos(fixedPos);
-        this.setRotation(fixedPitch, fixedYaw);
+        // Override default camera update to use our custom position and rotation
+        this.setPos(customPos);
+        this.setRotation(customYaw, customPitch);
+    }
+
+    public void setCustomPosition(double x, double y, double z) {
+        this.customPos = new Vec3d(x, y, z);
+        this.setPos(customPos);
+    }
+
+    public void setCustomRotation(float pitch, float yaw) {
+        this.customPitch = pitch;
+        this.customYaw = yaw;
+        this.setRotation(yaw, pitch);
+    }
+
+    public Matrix4f getViewMatrix() {
+        return new Matrix4f()
+                .identity()
+                .rotate(this.getRotation())
+                .translate(
+                        -(float)this.getPos().x,
+                        -(float)this.getPos().y,
+                        -(float)this.getPos().z
+                );
+    }
+
+    public Matrix4f getProjectionMatrix() {
+        MinecraftClient mc = MinecraftClient.getInstance();
+        float aspectRatio = (float)mc.getWindow().getFramebufferWidth() / (float)mc.getWindow().getFramebufferHeight();
+        return new Matrix4f()
+                .identity()
+                .perspective(
+                        (float)Math.toRadians(90.0f),
+                        aspectRatio,
+                        0.05f,
+                        1000.0f
+                );
     }
 }

@@ -1,28 +1,43 @@
 package net.tonz.deadspace.camera;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import com.mojang.blaze3d.systems.VertexSorter;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.gl.SimpleFramebuffer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.client.render.WorldRenderer;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Vec3d;
+import net.tonz.deadspace.displayblock.DisplayBlockEntityRenderer;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.lwjgl.opengl.GL11;
 
 @Environment(EnvType.CLIENT)
 public class CameraFramebufferManager {
+    //private static final ModCamera camera = new ModCamera();
+
 
     // Our off-screen framebuffer
     private static SimpleFramebuffer framebuffer;
 
     private static boolean initialized = false;
+    private static boolean rendering = false;
+
+
+    private static Matrix4f viewMatrix;
+    private static Matrix4f projectionMatrix;
+
+    /*
+    public static ModCamera getCamera() {
+        return camera;
+    }
+
+     */
 
     // Initialize the framebuffer with given size
     public static void init(int width, int height) {
@@ -37,73 +52,66 @@ public class CameraFramebufferManager {
     }
 
     public static void registerRenderHook() {
-        ClientTickEvents.END_CLIENT_TICK.register(context -> {
+        WorldRenderEvents.END.register(context -> {
             if (!initialized) {
-                init(1024, 1024);
+                init(MinecraftClient.getInstance().getWindow().getWidth(), MinecraftClient.getInstance().getWindow().getHeight());
             }
-            RenderSystem.recordRenderCall(() -> {
-                renderPlayerCameraView(); // safe on render thread
-            });
 
+
+            //ModCamera camera = CameraFramebufferManager.getCamera();
+            renderCustomCamera();
+
+            // unused methods
+            //renderRed(); // flawless easy works
         });
     }
 
-    public static Matrix4f getViewMatrix(Camera camera) {
-        // Create identity matrix
-        Matrix4f viewMatrix = new Matrix4f().identity();
-
-        // Apply rotation (must be conjugated because Minecraft uses right-handed system)
-        Quaternionf rotation = new Quaternionf(camera.getRotation()).conjugate();
-        viewMatrix.rotate(rotation);
-
-        // Apply translation (negative because we are moving the world opposite to camera)
-        //Vec3d pos = camera.getPos();
-        //viewMatrix.translate((float) -pos.x, (float) -pos.y, (float) -pos.z);
-
-        return viewMatrix;
-    }
-
-    public static void renderPlayerCameraView() {
-        if (framebuffer == null) return;
-
-        MinecraftClient mc = MinecraftClient.getInstance();
-        Camera camera = mc.gameRenderer.getCamera();
-        WorldRenderer worldRenderer = mc.worldRenderer;
-        float tickDelta = mc.getRenderTickCounter().getTickDelta(true);
-
-        if (!initialized || mc.world == null || mc.player == null || mc.gameRenderer == null) return;
+    public static void renderCustomCamera() {
+        if (framebuffer == null || rendering) return;
+        rendering = true;
 
         try {
-            camera = mc.gameRenderer.getCamera();
-        } catch (Exception e) {
-            return;
+            MinecraftClient mc = MinecraftClient.getInstance();
+            Camera camera = mc.gameRenderer.getCamera();
+            if (!initialized || mc.world == null) return;
+
+            WorldRenderer worldRenderer = mc.worldRenderer;
+            if (worldRenderer == null) return;
+            mc.getFramebuffer().endWrite();
+            framebuffer.beginWrite(true);
+
+            GL11.glViewport(0, 0, framebuffer.textureWidth, framebuffer.textureHeight);
+
+            float tickDelta = mc.getRenderTickCounter().getTickDelta(true);
+            Vec3d skyColorVec = mc.world.getSkyColor(camera.getPos(), tickDelta);
+            RenderSystem.clearColor((float)skyColorVec.x, (float)skyColorVec.y, (float)skyColorVec.z, 1.0f);
+            RenderSystem.clear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT, MinecraftClient.IS_SYSTEM_MAC);
+
+            viewMatrix = setCustomViewMatrix(camera);
+            projectionMatrix = setCustomProjectionMatrix(mc.options.getFov().getValue(), getAspectRatio(), 0.05f, 1000.0f);
+
+
+            RenderSystem.setProjectionMatrix(projectionMatrix, VertexSorter.BY_DISTANCE);
+
+            worldRenderer.setupFrustum(camera.getPos(), viewMatrix, projectionMatrix);
+
+            worldRenderer.render(
+                    mc.getRenderTickCounter(),
+                    false,
+                    camera,
+                    mc.gameRenderer,
+                    mc.gameRenderer.getLightmapTextureManager(),
+                    projectionMatrix,
+                    viewMatrix
+            );
+
+            framebuffer.endWrite();
+            mc.getFramebuffer().beginWrite(false);
+
+        } finally {
+            rendering = false;
+            initialized = false;
         }
-
-        framebuffer.beginWrite(true);
-
-        RenderSystem.clear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT, true);
-
-        float fov = mc.options.getFov().getValue();
-        //Matrix4f projectionMatrix = mc.gameRenderer.getBasicProjectionMatrix(fov);
-        Matrix4f viewMatrix = RenderSystem.getModelViewMatrix();
-        //System.out.println("viewMatrix Output: " + viewMatrix);
-
-        Matrix4f projectionMatrix = mc.gameRenderer.getBasicProjectionMatrix(mc.options.getFov().getValue().floatValue());
-        //Matrix4f viewMatrix = getViewMatrix(camera);
-
-        RenderTickCounter tickCounter = mc.getRenderTickCounter();
-
-        worldRenderer.render(
-                tickCounter,
-                false,
-                camera,
-                mc.gameRenderer,
-                mc.gameRenderer.getLightmapTextureManager(),
-                projectionMatrix,
-                viewMatrix
-        );
-
-        framebuffer.endWrite();
     }
 
     // Render a red texture to the framebuffer
@@ -134,7 +142,19 @@ public class CameraFramebufferManager {
         return framebuffer != null ? framebuffer.getColorAttachment() : -1;
     }
 
-    public static Framebuffer getFramebuffer() {
-        return framebuffer;
+    public static float getAspectRatio() {
+        if (framebuffer == null) return 1.0f; // Default aspect ratio
+        return (float) framebuffer.textureWidth / (float) framebuffer.textureHeight;
+    }
+
+    public static Matrix4f setCustomViewMatrix(Camera camera) {
+        return new Matrix4f().identity()
+                .rotate(camera.getRotation())
+                .translate(-(float)camera.getPos().x, -(float)camera.getPos().y, -(float)camera.getPos().z);
+    }
+
+    public static Matrix4f setCustomProjectionMatrix(float fov, float aspectRatio, float zNear, float zFar) {
+        return new Matrix4f().identity()
+                .perspective((float)Math.toRadians(fov), aspectRatio, zNear, zFar);
     }
 }
