@@ -44,7 +44,7 @@ public class DisplayBlockEntityRenderer implements BlockEntityRenderer<DisplayBl
         // Use shader and bind framebuffer texture
         RenderSystem.setShader(GameRenderer::getPositionTexProgram);
         int mainFramebufferId = MinecraftClient.getInstance().getFramebuffer().fbo; // call this to feel good about self
-        RenderSystem.setShaderTexture(0, mainFramebufferId);
+        RenderSystem.setShaderTexture(0, textureId);
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();

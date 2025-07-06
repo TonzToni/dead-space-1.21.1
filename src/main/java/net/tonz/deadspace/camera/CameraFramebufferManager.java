@@ -8,6 +8,7 @@ import net.minecraft.client.gl.SimpleFramebuffer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.render.Camera;
+import net.minecraft.client.render.Frustum;
 import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.util.math.MatrixStack;
@@ -29,15 +30,10 @@ public class CameraFramebufferManager {
     private static boolean rendering = false;
 
 
-    private static Matrix4f viewMatrix;
-    private static Matrix4f projectionMatrix;
+    public static Matrix4f viewMatrix;
+    public static Matrix4f projectionMatrix;
 
-    /*
-    public static ModCamera getCamera() {
-        return camera;
-    }
-
-     */
+    private static int count;
 
     // Initialize the framebuffer with given size
     public static void init(int width, int height) {
@@ -87,13 +83,13 @@ public class CameraFramebufferManager {
             RenderSystem.clearColor((float)skyColorVec.x, (float)skyColorVec.y, (float)skyColorVec.z, 1.0f);
             RenderSystem.clear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT, MinecraftClient.IS_SYSTEM_MAC);
 
-            viewMatrix = setCustomViewMatrix(camera);
-            projectionMatrix = setCustomProjectionMatrix(mc.options.getFov().getValue(), getAspectRatio(), 0.05f, 1000.0f);
+            //viewMatrix = setCustomViewMatrix(camera);
+            //projectionMatrix = setCustomProjectionMatrix(mc.options.getFov().getValue(), (float)mc.getWindow().getWidth() / mc.getWindow().getHeight(), 0.05f, 1000.0f);
 
 
-            RenderSystem.setProjectionMatrix(projectionMatrix, VertexSorter.BY_DISTANCE);
+            //RenderSystem.setProjectionMatrix(projectionMatrix, VertexSorter.BY_DISTANCE);
 
-            worldRenderer.setupFrustum(camera.getPos(), viewMatrix, projectionMatrix);
+            //worldRenderer.setupFrustum(camera.getPos(), viewMatrix, projectionMatrix);
 
             worldRenderer.render(
                     mc.getRenderTickCounter(),
@@ -104,6 +100,13 @@ public class CameraFramebufferManager {
                     projectionMatrix,
                     viewMatrix
             );
+
+
+            count++;
+            if (count >= 500) {
+                count = 0;
+                System.out.println("Projection Matrix:\n" + projectionMatrix);
+            }
 
             framebuffer.endWrite();
             mc.getFramebuffer().beginWrite(false);
@@ -149,12 +152,12 @@ public class CameraFramebufferManager {
 
     public static Matrix4f setCustomViewMatrix(Camera camera) {
         return new Matrix4f().identity()
-                .rotate(camera.getRotation())
-                .translate(-(float)camera.getPos().x, -(float)camera.getPos().y, -(float)camera.getPos().z);
+                .translate(-(float)camera.getPos().x, -(float)camera.getPos().y, -(float)camera.getPos().z)
+                .rotate(camera.getRotation());
     }
 
     public static Matrix4f setCustomProjectionMatrix(float fov, float aspectRatio, float zNear, float zFar) {
-        return new Matrix4f().identity()
+        return new Matrix4f()
                 .perspective((float)Math.toRadians(fov), aspectRatio, zNear, zFar);
     }
 }
