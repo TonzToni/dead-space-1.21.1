@@ -1,8 +1,6 @@
-// src/main/java/net/tonz/deadspace/mixin/WorldRendererMixin.java
 package net.tonz.deadspace.mixin;
 
 import net.minecraft.client.render.*;
-import net.tonz.deadspace.camera.CameraFramebufferManager;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -27,8 +25,8 @@ public class WorldRendererMixin {
             CallbackInfo ci
     ) {
 
-        CameraFramebufferManager.projectionMatrix = matrix4f;
-        CameraFramebufferManager.viewMatrix = matrix4f2;
+        //CameraFramebufferManager.projectionMatrix = matrix4f;
+        //CameraFramebufferManager.viewMatrix = matrix4f2;
 
         //System.out.println("Main Camera Projection Matrix:\n" + matrix4f);
         //System.out.println("Main Camera View Matrix:\n" + matrix4f2);

@@ -12,8 +12,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.tonz.deadspace.block.ModBlockEntities;
-import net.tonz.deadspace.camera.CameraStorage;
-import net.tonz.deadspace.camera.ModCamera;
 
 public class DisplayBlock extends Block implements BlockEntityProvider {
     public DisplayBlock(Settings settings) {
