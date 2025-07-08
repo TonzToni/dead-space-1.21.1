@@ -15,6 +15,7 @@ public class ModBlocks {
 
     public static void register() {
         Registry.register(Registries.BLOCK, Identifier.of(DeadSpace.MOD_ID, "display_block"), DISPLAY_BLOCK);
+
         Registry.register(Registries.ITEM, Identifier.of(DeadSpace.MOD_ID, "display_block"),
                 new BlockItem(DISPLAY_BLOCK, new Item.Settings()));
     }

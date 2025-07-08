@@ -11,6 +11,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.RotationAxis;
 import net.tonz.deadspace.camera.CameraFramebufferManager;
 import org.joml.Matrix4f;
+import org.lwjgl.opengl.GL30;
 
 @Environment(EnvType.CLIENT)
 public class DisplayBlockEntityRenderer implements BlockEntityRenderer<DisplayBlockEntity> {
@@ -45,6 +46,8 @@ public class DisplayBlockEntityRenderer implements BlockEntityRenderer<DisplayBl
         RenderSystem.defaultBlendFunc();
         RenderSystem.disableCull();
 
+
+
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
 
@@ -54,10 +57,10 @@ public class DisplayBlockEntityRenderer implements BlockEntityRenderer<DisplayBl
         float aspect = CameraFramebufferManager.getAspectRatio();
 
         // Vertex order: bottom-left, bottom-right, top-right, top-left
-        buffer.vertex(matrix, -5.5f * aspect, -5.5f, 0f).texture(0f, 0f).color(1f, 1f, 1f, 1f);
-        buffer.vertex(matrix,  5.5f * aspect, -5.5f, 0f).texture(1f, 0f).color(1f, 1f, 1f, 1f);
-        buffer.vertex(matrix,  5.5f * aspect,  5.5f, 0f).texture(1f, 1f).color(1f, 1f, 1f, 1f);
-        buffer.vertex(matrix, -5.5f * aspect,  5.5f, 0f).texture(0f, 1f).color(1f, 1f, 1f, 1f);
+        buffer.vertex(matrix, -2.5f * aspect, -2.5f, 0f).texture(0f, 0f).color(1f, 1f, 1f, 1f);
+        buffer.vertex(matrix,  2.5f * aspect, -2.5f, 0f).texture(1f, 0f).color(1f, 1f, 1f, 1f);
+        buffer.vertex(matrix,  2.5f * aspect,  2.5f, 0f).texture(1f, 1f).color(1f, 1f, 1f, 1f);
+        buffer.vertex(matrix, -2.5f * aspect,  2.5f, 0f).texture(0f, 1f).color(1f, 1f, 1f, 1f);
 
         // Finalize draw call
         BufferRenderer.drawWithGlobalProgram(buffer.end());
