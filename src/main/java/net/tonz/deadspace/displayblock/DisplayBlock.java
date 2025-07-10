@@ -40,6 +40,7 @@ public class DisplayBlock extends Block implements BlockEntityProvider {
 
         Vec3d camPos = new Vec3d(pos.getX() + 0.5, pos.getY() + 1.5, pos.getZ() + 0.5);
         //CameraStorage.camera = new ModCamera(camPos, 0f, 0f);
+
         System.out.println("Camera placed at " + camPos);
     }
 }

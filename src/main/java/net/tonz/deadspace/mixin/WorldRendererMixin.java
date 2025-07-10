@@ -20,8 +20,8 @@ public class WorldRendererMixin {
     private Framebuffer originalWeatherFramebuffer;
     private Framebuffer originalCloudsFramebuffer;
 
-    @Shadow private Framebuffer entityOutlinesFramebuffer;
-    @Shadow private Framebuffer translucentFramebuffer;
+    @Shadow @Nullable private Framebuffer entityOutlinesFramebuffer;
+    @Shadow @Nullable private Framebuffer translucentFramebuffer;
     @Shadow @Nullable private Framebuffer entityFramebuffer;
     @Shadow @Nullable private Framebuffer particlesFramebuffer;
     @Shadow @Nullable private Framebuffer weatherFramebuffer;
@@ -90,11 +90,5 @@ public class WorldRendererMixin {
             weatherFramebuffer = originalWeatherFramebuffer;
             cloudsFramebuffer = originalCloudsFramebuffer;
         }
-    }
-
-    @Inject(method = "loadTransparencyPostProcessor", at = @At("HEAD"))
-    private void onLoadTransparencyPostProcessorReturn(CallbackInfo ci) {
-        System.out.println("transparency post processor loaded");
-
     }
 }

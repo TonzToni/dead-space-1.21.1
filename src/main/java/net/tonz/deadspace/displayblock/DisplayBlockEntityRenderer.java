@@ -11,7 +11,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.RotationAxis;
 import net.tonz.deadspace.camera.CameraFramebufferManager;
 import org.joml.Matrix4f;
-import org.lwjgl.opengl.GL30;
 
 @Environment(EnvType.CLIENT)
 public class DisplayBlockEntityRenderer implements BlockEntityRenderer<DisplayBlockEntity> {
@@ -42,8 +41,7 @@ public class DisplayBlockEntityRenderer implements BlockEntityRenderer<DisplayBl
         RenderSystem.setShader(GameRenderer::getPositionTexProgram);
         RenderSystem.setShaderTexture(0, textureId);
 
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
+
         RenderSystem.disableCull();
 
 
