@@ -1,7 +1,9 @@
 package net.tonz.deadspace.mixin;
 
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.render.*;
+import net.minecraft.client.world.ClientWorld;
 import net.tonz.deadspace.camera.CameraFramebufferManager;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
@@ -26,6 +28,7 @@ public class WorldRendererMixin {
     @Shadow @Nullable private Framebuffer particlesFramebuffer;
     @Shadow @Nullable private Framebuffer weatherFramebuffer;
     @Shadow @Nullable private Framebuffer cloudsFramebuffer;
+    @Shadow @Nullable private ClientWorld world;
 
     @Inject(method = "render", at = @At("HEAD"))
     private void onRenderHead(
@@ -39,6 +42,7 @@ public class WorldRendererMixin {
             CallbackInfo ci
     ) {
         if (CameraFramebufferManager.rendering) {
+
             // Save originals
             originalEntityOutlinesFramebuffer = entityOutlinesFramebuffer;
             originalTranslucentFramebuffer = translucentFramebuffer;
@@ -56,8 +60,9 @@ public class WorldRendererMixin {
             cloudsFramebuffer = CameraFramebufferManager.cloudsFramebuffer;
 
             CameraFramebufferManager.bindCustomFramebuffer();
-            CameraFramebufferManager.setMatrices(projectionMatrix, viewMatrix);
+
         }
+        //CameraFramebufferManager.setMatrices(projectionMatrix, viewMatrix);
     }
 
     @Inject(method = "render", at = @At("RETURN"))
@@ -90,5 +95,23 @@ public class WorldRendererMixin {
             weatherFramebuffer = originalWeatherFramebuffer;
             cloudsFramebuffer = originalCloudsFramebuffer;
         }
+    }
+
+    @Inject(method = "renderSky", at = @At("HEAD"), cancellable = true)
+    private void onRenderSkyHead(
+            Matrix4f viewMatrix,
+            Matrix4f projectionMatrix,
+            float tickDelta,
+            Camera camera,
+            boolean isSpectator,
+            Runnable fogCallback,
+            CallbackInfo ci
+    ) {
+        /*
+        if (CameraFramebufferManager.rendering && MinecraftClient.getInstance().world != null) {
+            ci.cancel();
+        }
+
+         */
     }
 }

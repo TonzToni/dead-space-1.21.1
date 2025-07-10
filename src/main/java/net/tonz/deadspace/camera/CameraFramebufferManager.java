@@ -9,10 +9,15 @@ import net.minecraft.client.gl.SimpleFramebuffer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.render.*;
+import net.minecraft.client.world.ClientWorld;
+import net.minecraft.util.math.Vec3d;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
+
+import static org.lwjgl.opengl.GL11C.GL_COLOR_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11C.GL_DEPTH_BUFFER_BIT;
 
 @Environment(EnvType.CLIENT)
 public class CameraFramebufferManager {
@@ -44,7 +49,6 @@ public class CameraFramebufferManager {
         }
 
         framebuffer = new SimpleFramebuffer(width, height, true, false);
-        //framebuffer.setClearColor(0f, 0f, 0f, 1f);
         initialized = true;
     }
 
@@ -70,7 +74,7 @@ public class CameraFramebufferManager {
         Camera camera = mc.gameRenderer.getCamera();
         WorldRenderer worldRenderer = mc.worldRenderer;
 
-        if (rendering) return;
+        if (rendering || mc.world == null) return;
         rendering = true;
 
         mc.getFramebuffer().endWrite();
@@ -79,12 +83,18 @@ public class CameraFramebufferManager {
         //RenderSystem.enableBlend();
         //RenderSystem.defaultBlendFunc();
 
-        GL11.glViewport(0, 0, framebuffer.textureWidth, framebuffer.textureHeight);
+        // Get the sky color as a Vec3d
+        Vec3d skyColor = mc.world.getSkyColor(camera.getPos(), mc.getRenderTickCounter().getTickDelta(true));
 
-        RenderSystem.clearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        RenderSystem.clear(
-                GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT,
-                MinecraftClient.IS_SYSTEM_MAC);
+        // Extract RGB components
+        float skyRed = (float) skyColor.x;
+        float skyGreen = (float) skyColor.y;
+        float skyBlue = (float) skyColor.z;
+
+        RenderSystem.clearColor(skyRed, skyGreen, skyBlue, 1.0f); // Opaque sky color
+        RenderSystem.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, true);
+
+        GL11.glViewport(0, 0, framebuffer.textureWidth, framebuffer.textureHeight);
 
         viewMatrix = setCustomViewMatrix(camera);
 
@@ -98,7 +108,11 @@ public class CameraFramebufferManager {
 
 
         RenderSystem.setProjectionMatrix(projectionMatrix, VertexSorter.BY_DISTANCE);
-        worldRenderer.setupFrustum(camera.getPos(), viewMatrix, projectionMatrix);
+
+
+        // When i =setup the frustum with these values, it seems to desync culling
+        // TODO: find a way to properly setup the frustum so that culling works correctly with a custom camera - most likely inject a call inside worldrenderer.render
+        // worldRenderer.setupFrustum(camera.getPos(), viewMatrix, projectionMatrix);
 
         worldRenderer.render(
                 mc.getRenderTickCounter(),
