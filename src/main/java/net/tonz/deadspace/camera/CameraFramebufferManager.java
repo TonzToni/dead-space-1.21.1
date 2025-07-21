@@ -8,16 +8,12 @@ import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.gl.SimpleFramebuffer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gl.VertexBuffer;
 import net.minecraft.client.render.*;
-import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.Vec3d;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
-import org.spongepowered.asm.mixin.Shadow;
 
 import static org.lwjgl.opengl.GL11C.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11C.GL_DEPTH_BUFFER_BIT;
@@ -25,8 +21,6 @@ import static org.lwjgl.opengl.GL11C.GL_DEPTH_BUFFER_BIT;
 @Environment(EnvType.CLIENT)
 public class CameraFramebufferManager {
     private static int prevFramebufferId;
-
-    //private PostEffectProcessor entityOutlinePostProcessor;
 
     public static Framebuffer entityOutlinesFramebuffer;
     public static Framebuffer translucentFramebuffer;
@@ -61,10 +55,6 @@ public class CameraFramebufferManager {
                 init(MinecraftClient.getInstance().getWindow().getWidth(), MinecraftClient.getInstance().getWindow().getHeight());
             }
 
-            //ModCamera camera = CameraFramebufferManager.getCamera();
-
-            // this is the closest I can possibly get with minecraft render pipeline without altering it, in order to properly render things like water, entities, portals,
-            // I would need to isolate the main render pass. currently without doing that, duplicates of these things are created outside my created framebuffer and instead placed into the main one with incorrect matrices.
             renderCustomCamera();
 
             // unused methods
@@ -171,11 +161,6 @@ public class CameraFramebufferManager {
 
     public static void bindCustomFramebuffer() {
         prevFramebufferId = GL11.glGetInteger(GL30.GL_DRAW_FRAMEBUFFER_BINDING);
-    }
-
-    public static void setMatrices(Matrix4f projection, Matrix4f view) {
-        projectionMatrix = new Matrix4f(projection);
-        viewMatrix = new Matrix4f(view);
     }
 
     public static void unbindCustomFramebuffer() {

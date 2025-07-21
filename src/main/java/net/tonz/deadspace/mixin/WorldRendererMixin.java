@@ -1,15 +1,13 @@
 package net.tonz.deadspace.mixin;
 
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
-import net.minecraft.client.gl.VertexBuffer;
 import net.minecraft.client.render.*;
-import net.minecraft.client.world.ClientWorld;
 import net.tonz.deadspace.camera.CameraFramebufferManager;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -95,23 +93,5 @@ public class WorldRendererMixin {
             weatherFramebuffer = originalWeatherFramebuffer;
             cloudsFramebuffer = originalCloudsFramebuffer;
         }
-    }
-
-    @Inject(method = "renderSky", at = @At("HEAD"), cancellable = true)
-    private void onRenderSkyHead(
-            Matrix4f viewMatrix,
-            Matrix4f projectionMatrix,
-            float tickDelta,
-            Camera camera,
-            boolean isSpectator,
-            Runnable fogCallback,
-            CallbackInfo ci
-    ) {
-        /*
-        if (CameraFramebufferManager.rendering && MinecraftClient.getInstance().world != null) {
-            ci.cancel();
-        }
-
-         */
     }
 }
