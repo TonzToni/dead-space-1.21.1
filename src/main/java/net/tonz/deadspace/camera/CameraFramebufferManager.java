@@ -8,13 +8,16 @@ import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.gl.SimpleFramebuffer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gl.VertexBuffer;
 import net.minecraft.client.render.*;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
+import org.spongepowered.asm.mixin.Shadow;
 
 import static org.lwjgl.opengl.GL11C.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11C.GL_DEPTH_BUFFER_BIT;
@@ -80,9 +83,6 @@ public class CameraFramebufferManager {
         mc.getFramebuffer().endWrite();
         framebuffer.beginWrite(true);
 
-        //RenderSystem.enableBlend();
-        //RenderSystem.defaultBlendFunc();
-
         // Get the sky color as a Vec3d
         Vec3d skyColor = mc.world.getSkyColor(camera.getPos(), mc.getRenderTickCounter().getTickDelta(true));
 
@@ -94,7 +94,7 @@ public class CameraFramebufferManager {
         RenderSystem.clearColor(skyRed, skyGreen, skyBlue, 1.0f); // Opaque sky color
         RenderSystem.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, true);
 
-        GL11.glViewport(0, 0, framebuffer.textureWidth, framebuffer.textureHeight);
+        //GL30.glViewport(0, 0, framebuffer.textureWidth, framebuffer.textureHeight);
 
         viewMatrix = setCustomViewMatrix(camera);
 
@@ -107,12 +107,7 @@ public class CameraFramebufferManager {
                 viewDistance);
 
 
-        RenderSystem.setProjectionMatrix(projectionMatrix, VertexSorter.BY_DISTANCE);
-
-
-        // When i =setup the frustum with these values, it seems to desync culling
-        // TODO: find a way to properly setup the frustum so that culling works correctly with a custom camera - most likely inject a call inside worldrenderer.render
-        // worldRenderer.setupFrustum(camera.getPos(), viewMatrix, projectionMatrix);
+        RenderSystem.setProjectionMatrix(projectionMatrix, VertexSorter.BY_Z);
 
         worldRenderer.render(
                 mc.getRenderTickCounter(),
@@ -123,8 +118,6 @@ public class CameraFramebufferManager {
                 viewMatrix,
                 projectionMatrix
         );
-
-        RenderSystem.disableBlend();
 
         framebuffer.endWrite();
         mc.getFramebuffer().beginWrite(false);

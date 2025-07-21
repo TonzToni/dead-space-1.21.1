@@ -2,6 +2,7 @@ package net.tonz.deadspace.mixin;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
+import net.minecraft.client.gl.VertexBuffer;
 import net.minecraft.client.render.*;
 import net.minecraft.client.world.ClientWorld;
 import net.tonz.deadspace.camera.CameraFramebufferManager;
@@ -28,7 +29,6 @@ public class WorldRendererMixin {
     @Shadow @Nullable private Framebuffer particlesFramebuffer;
     @Shadow @Nullable private Framebuffer weatherFramebuffer;
     @Shadow @Nullable private Framebuffer cloudsFramebuffer;
-    @Shadow @Nullable private ClientWorld world;
 
     @Inject(method = "render", at = @At("HEAD"))
     private void onRenderHead(

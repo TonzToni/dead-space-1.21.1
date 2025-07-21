@@ -63,8 +63,7 @@ public class DisplayBlockEntityRenderer implements BlockEntityRenderer<DisplayBl
         // Finalize draw call
         BufferRenderer.drawWithGlobalProgram(buffer.end());
 
-        RenderSystem.enableCull();
-        RenderSystem.disableBlend();
+        //RenderSystem.enableCull();
 
         matrices.pop();
     }
